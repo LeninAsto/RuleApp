@@ -1,0 +1,5 @@
+Paheal: lista y detalle verificados con API real.
+Shimmie: lista y detalle verificados con API real.
+Danbooru: lista pública verificada con API real.
+TLS API 36: shimmie.shishnet.org HTTP 200
+TLS API 36: rule34.paheal.net HTTP 200

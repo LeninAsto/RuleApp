@@ -1,0 +1,4 @@
+<posts count="3" offset="0">
+  <post id="12" file_name="landscape.jpg" file_url="/images/landscape.jpg" preview_url="/thumbs/landscape.jpg" width="800" height="1200" tags="landscape sky" rating="?" source="file:///private/source.jpg" />
+  <post id="10" file_name="animation.gif" file_url="/images/animation.gif" preview_url="/thumbs/animation.jpg" rating="?" />
+</posts>

@@ -21,4 +21,5 @@ dependencyResolutionManagement {
 
 rootProject.name = "Rule App"
 include(":app")
- 
+include(":macrobenchmark")
+

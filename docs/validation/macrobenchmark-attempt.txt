@@ -1,0 +1,60 @@
+
+com.leninasto.ruleapp.macrobenchmark.GalleryBenchmark:INSTRUMENTATION_STATUS: additionalTestOutputFile_GalleryBenchmark_galleryScroll_iter000_2026-10-10-23-10-50.perfetto-trace=/storage/emulated/0/Android/media/com.leninasto.ruleapp.macrobenchmark/GalleryBenchmark_galleryScroll_iter000_2026-10-10-23-10-50.perfetto-trace
+INSTRUMENTATION_STATUS_CODE: 2
+INSTRUMENTATION_STATUS: android.studio.display.benchmark=    [Trace with processing error: Observed no renderthread slices in trace - verify...](file://GalleryBenchmark_galleryScroll_iter000_2026-10-10-23-10-50.perfetto-trace)
+
+INSTRUMENTATION_STATUS: android.studio.v2display.benchmark=    [Trace with processing error: Observed no renderthread slices in trace - verify...](file://GalleryBenchmark_galleryScroll_iter000_2026-10-10-23-10-50.perfetto-trace)
+
+INSTRUMENTATION_STATUS: android.studio.v2display.benchmark.outputDirPath=/storage/emulated/0/Android/media/com.leninasto.ruleapp.macrobenchmark
+INSTRUMENTATION_STATUS: android.studio.v3display.benchmark=    [Trace with processing error: Observed no renderthread slices in trace - verify...](file://GalleryBenchmark_galleryScroll_iter000_2026-10-10-23-10-50.perfetto-trace)
+
+INSTRUMENTATION_STATUS: android.studio.v3display.benchmark.outputDirPath=/storage/emulated/0/Android/media/com.leninasto.ruleapp.macrobenchmark
+INSTRUMENTATION_STATUS_CODE: 2
+
+Error in galleryScroll(com.leninasto.ruleapp.macrobenchmark.GalleryBenchmark):
+java.lang.IllegalStateException: Observed no renderthread slices in trace - verify that your benchmark is redrawing and is hardware accelerated (which is the default).
+	at androidx.benchmark.macro.perfetto.FrameTimingQuery.getFrameData$benchmark_macro_release(FrameTimingQuery.kt:186)
+	at androidx.benchmark.macro.FrameTimingMetric.getMeasurements$benchmark_macro_release(Metric.kt:209)
+	at androidx.benchmark.macro.MacrobenchmarkPhaseKt.runPhase$lambda$18$lambda$17(MacrobenchmarkPhase.kt:169)
+	at androidx.benchmark.macro.MacrobenchmarkPhaseKt.$r8$lambda$bz1fsM-VtJlEX4UmZP0Xfj62Fwg(MacrobenchmarkPhase.kt:0)
+	at androidx.benchmark.macro.MacrobenchmarkPhaseKt$$ExternalSyntheticLambda1.invoke(D8$$SyntheticClass:0)
+	at androidx.benchmark.traceprocessor.TraceProcessor.loadTrace(TraceProcessor.kt:171)
+	at androidx.benchmark.macro.MacrobenchmarkPhaseKt.runPhase(MacrobenchmarkPhase.kt:161)
+	at androidx.benchmark.macro.MacrobenchmarkKt.macrobenchmark$lambda$6(Macrobenchmark.kt:271)
+	at androidx.benchmark.macro.MacrobenchmarkKt.$r8$lambda$xwXnT_b4vi-hCaLpXAO_soLs9-w(Macrobenchmark.kt:0)
+	at androidx.benchmark.macro.MacrobenchmarkKt$$ExternalSyntheticLambda1.invoke(D8$$SyntheticClass:0)
+	at androidx.benchmark.macro.TraceProcessorExtensionsKt.runServer(TraceProcessorExtensions.kt:163)
+	at androidx.benchmark.macro.TraceProcessorExtensionsKt.runServer$default(TraceProcessorExtensions.kt:158)
+	at androidx.benchmark.macro.MacrobenchmarkKt.macrobenchmark(Macrobenchmark.kt:263)
+	at androidx.benchmark.macro.MacrobenchmarkKt.macrobenchmarkWithStartupMode(Macrobenchmark.kt:400)
+	at androidx.benchmark.macro.junit4.MacrobenchmarkRule.measureRepeated(MacrobenchmarkRule.kt:87)
+	at androidx.benchmark.macro.junit4.MacrobenchmarkRule.measureRepeated$default(MacrobenchmarkRule.kt:77)
+	at com.leninasto.ruleapp.macrobenchmark.GalleryBenchmark.galleryScroll(GalleryBenchmark.kt:14)
+
+
+Time: 45.227
+There was 1 failure:
+1) galleryScroll(com.leninasto.ruleapp.macrobenchmark.GalleryBenchmark)
+java.lang.IllegalStateException: Observed no renderthread slices in trace - verify that your benchmark is redrawing and is hardware accelerated (which is the default).
+	at androidx.benchmark.macro.perfetto.FrameTimingQuery.getFrameData$benchmark_macro_release(FrameTimingQuery.kt:186)
+	at androidx.benchmark.macro.FrameTimingMetric.getMeasurements$benchmark_macro_release(Metric.kt:209)
+	at androidx.benchmark.macro.MacrobenchmarkPhaseKt.runPhase$lambda$18$lambda$17(MacrobenchmarkPhase.kt:169)
+	at androidx.benchmark.macro.MacrobenchmarkPhaseKt.$r8$lambda$bz1fsM-VtJlEX4UmZP0Xfj62Fwg(MacrobenchmarkPhase.kt:0)
+	at androidx.benchmark.macro.MacrobenchmarkPhaseKt$$ExternalSyntheticLambda1.invoke(D8$$SyntheticClass:0)
+	at androidx.benchmark.traceprocessor.TraceProcessor.loadTrace(TraceProcessor.kt:171)
+	at androidx.benchmark.macro.MacrobenchmarkPhaseKt.runPhase(MacrobenchmarkPhase.kt:161)
+	at androidx.benchmark.macro.MacrobenchmarkKt.macrobenchmark$lambda$6(Macrobenchmark.kt:271)
+	at androidx.benchmark.macro.MacrobenchmarkKt.$r8$lambda$xwXnT_b4vi-hCaLpXAO_soLs9-w(Macrobenchmark.kt:0)
+	at androidx.benchmark.macro.MacrobenchmarkKt$$ExternalSyntheticLambda1.invoke(D8$$SyntheticClass:0)
+	at androidx.benchmark.macro.TraceProcessorExtensionsKt.runServer(TraceProcessorExtensions.kt:163)
+	at androidx.benchmark.macro.TraceProcessorExtensionsKt.runServer$default(TraceProcessorExtensions.kt:158)
+	at androidx.benchmark.macro.MacrobenchmarkKt.macrobenchmark(Macrobenchmark.kt:263)
+	at androidx.benchmark.macro.MacrobenchmarkKt.macrobenchmarkWithStartupMode(Macrobenchmark.kt:400)
+	at androidx.benchmark.macro.junit4.MacrobenchmarkRule.measureRepeated(MacrobenchmarkRule.kt:87)
+	at androidx.benchmark.macro.junit4.MacrobenchmarkRule.measureRepeated$default(MacrobenchmarkRule.kt:77)
+	at com.leninasto.ruleapp.macrobenchmark.GalleryBenchmark.galleryScroll(GalleryBenchmark.kt:14)
+
+FAILURES!!!
+Tests run: 1,  Failures: 1
+
+

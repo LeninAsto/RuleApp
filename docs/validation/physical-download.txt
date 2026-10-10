@@ -1,0 +1,1 @@
+Shimmie: original autorizado descargado con DownloadManager; archivo de prueba retirado. API 36.

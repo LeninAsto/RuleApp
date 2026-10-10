@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">Rule App</string>
+    <string name="restriction_title">Deshabilitar RuleApp</string>
+    <string name="restriction_description">Bloquea el acceso al contenido y cancela las consultas mientras esté activa.</string>
 </resources>

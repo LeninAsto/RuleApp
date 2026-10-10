@@ -1,0 +1,14 @@
+
+com.leninasto.ruleapp.AppLockTest:..
+com.leninasto.ruleapp.CredentialStoreTest:.
+com.leninasto.ruleapp.LibraryDatabaseTest:..
+com.leninasto.ruleapp.MediaTest:..
+com.leninasto.ruleapp.LiveSourcesTest:....
+com.leninasto.ruleapp.DownloadTest:.
+com.leninasto.ruleapp.WelcomeScreenTest:...
+
+Time: 30.839
+
+OK (15 tests)
+
+
