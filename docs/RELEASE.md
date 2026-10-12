@@ -30,6 +30,8 @@ Los originales en Downloads son externos al JSON; las descargas en curso y su re
 
 `.github/workflows/android.yml` ejecuta tests/lint y una matriz de cinco APK firmados. Publica una release solo al subir un tag `v*` que coincida con `ver.txt`; las beta son prereleases. Las PR ejecutan checks sin secretos ni publicación. Este cambio prepara el workflow; no sube el keystore ni configura secretos de GitHub automáticamente.
 
+Los jobs usan `ubuntu-24.04`, JDK 21 y acciones con runtime Node 24. El script `.github/scripts/setup-android-sdk.sh` utiliza el SDK incluido en el runner, acepta sus licencias e instala explícitamente `platform-tools`, `platforms;android-36` y `build-tools;36.0.0`. No utiliza `android-actions/setup-android@v3`, cuyo paquete predeterminado `tools` ya no está disponible. Si falla la preparación del SDK, el job falla conservando el error; solo se suben informes cuando existen, mientras que la ausencia de APKs sí falla la entrega.
+
 Configura en Settings → Secrets and variables → Actions:
 
 - `KEYSTORE_BASE64`: archivo del keystore codificado en base64.
