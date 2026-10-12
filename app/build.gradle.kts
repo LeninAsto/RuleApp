@@ -1,9 +1,25 @@
+import java.util.Properties
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.ksp)
 }
+
+val appVersion = rootProject.file("ver.txt").readText().trim()
+val versionParts = Regex("(\\d+)\\.(\\d+)\\.(\\d+)(?:_beta)?").matchEntire(appVersion)
+    ?: error("ver.txt debe contener una versión como 0.9.1_beta")
+val appVersionCode = versionParts.groupValues[1].toInt() * 1_000_000 +
+    versionParts.groupValues[2].toInt() * 10_000 + versionParts.groupValues[3].toInt() * 100 +
+    if (appVersion.endsWith("_beta")) 1 else 99
+val signingProperties = Properties().apply {
+    rootProject.file("keystore.properties").takeIf { it.exists() }?.inputStream()?.use { load(it) }
+}
+fun signingValue(name: String): String? = providers.environmentVariable("RULEAPP_${name.uppercase()}").orNull ?: signingProperties.getProperty(name)
+val hasReleaseSigning = listOf("storeFile", "storePassword", "keyAlias", "keyPassword").all { !signingValue(it).isNullOrBlank() }
+val targetAbi = providers.gradleProperty("targetAbi").orNull ?: "universal"
+require(targetAbi in listOf("universal", "arm64-v8a", "armeabi-v7a", "x86", "x86_64")) { "ABI desconocida" }
 
 android {
     namespace = "com.leninasto.ruleapp"
@@ -13,14 +29,24 @@ android {
         applicationId = "com.leninasto.ruleapp"
         minSdk = 26
         targetSdk = 36
-        versionCode = 3
-        versionName = "0.9_beta"
+        versionCode = appVersionCode
+        versionName = appVersion
+        if (targetAbi != "universal") ndk { abiFilters += targetAbi }
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
+    signingConfigs {
+        if (hasReleaseSigning) create("ownerRelease") {
+            storeFile = rootProject.file(signingValue("storeFile")!!)
+            storePassword = signingValue("storePassword")
+            keyAlias = signingValue("keyAlias")
+            keyPassword = signingValue("keyPassword")
+        }
+    }
     buildTypes {
         release {
+            if (hasReleaseSigning) signingConfig = signingConfigs.getByName("ownerRelease")
             isMinifyEnabled = false
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
@@ -43,6 +69,7 @@ android {
     }
     buildFeatures {
         compose = true
+        buildConfig = true
     }
 }
 

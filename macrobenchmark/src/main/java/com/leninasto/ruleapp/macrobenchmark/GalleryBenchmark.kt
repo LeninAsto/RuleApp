@@ -20,10 +20,11 @@ class GalleryBenchmark {
             // Scroll is the measured operation. Wait on actual UI readiness in setup;
             // old gfxinfo launch markers can be absent on Android 16 emulators.
             device.executeShellCommand("am start -W -n com.leninasto.ruleapp.benchmark/com.leninasto.ruleapp.MainActivity")
-            if (device.wait(Until.hasObject(By.text("Continuar a RuleApp")), 3_000)) {
-                device.findObject(By.text("Continuar a RuleApp")).click()
+            val continueButton = By.text(java.util.regex.Pattern.compile("Continuar a Daparushi|Continue to Daparushi"))
+            if (device.wait(Until.hasObject(continueButton), 3_000)) {
+                device.findObject(continueButton).click()
             }
-            check(device.wait(Until.hasObject(By.desc("Guardar en favoritos")), 10_000)) { "Gallery not loaded" }
+            check(device.wait(Until.hasObject(By.desc(java.util.regex.Pattern.compile("Guardar en favoritos|Save to favorites"))), 10_000)) { "Gallery not loaded" }
         }
     ) {
         val width = device.displayWidth

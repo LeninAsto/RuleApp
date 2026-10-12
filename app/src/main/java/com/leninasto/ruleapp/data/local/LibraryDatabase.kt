@@ -21,6 +21,10 @@ data class DownloadEntity(@PrimaryKey val postKey: String, val downloadId: Long,
 
 @Dao
 abstract class LibraryDao {
+    @Query("SELECT * FROM saved_posts") abstract suspend fun allSaved(): List<SavedPost>
+    @Query("SELECT * FROM collections") abstract suspend fun allCollections(): List<CollectionEntity>
+    @Query("SELECT * FROM memberships") abstract suspend fun allMemberships(): List<Membership>
+    @Transaction open suspend fun snapshot() = Triple(allSaved(), allCollections(), allMemberships())
     @Query("SELECT * FROM saved_posts ORDER BY addedAt DESC") abstract fun saved(): Flow<List<SavedPost>>
     @Query("SELECT * FROM collections ORDER BY createdAt DESC") abstract fun collections(): Flow<List<CollectionEntity>>
     @Query("SELECT * FROM memberships") abstract fun memberships(): Flow<List<Membership>>
@@ -38,11 +42,22 @@ abstract class LibraryDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE) abstract suspend fun recordDownload(download: DownloadEntity)
     @Query("SELECT * FROM downloads WHERE postKey = :key") abstract suspend fun download(key: String): DownloadEntity?
     @Query("DELETE FROM downloads") abstract suspend fun clearDownloads()
+    @Query("SELECT * FROM downloads WHERE downloadId = :id") abstract suspend fun downloadById(id: Long): DownloadEntity?
+    @Query("DELETE FROM downloads WHERE downloadId = :id") abstract suspend fun removeDownload(id: Long)
     @Query("DELETE FROM saved_posts") abstract suspend fun clearSaved()
     @Query("DELETE FROM collections") abstract suspend fun clearCollections()
     @Transaction open suspend fun toggle(post: SavedPost) { if (find(post.key) == null) save(post) else remove(post.key) }
     @Transaction open suspend fun collect(post: SavedPost, collectionId: Long) { save(post); addMembership(Membership(collectionId, post.key)) }
     @Transaction open suspend fun clearLibrary() { clearCollections(); clearSaved(); clearHistory(); clearDownloads() }
+    @Transaction open suspend fun restoreLibrary(posts: List<SavedPost>, boards: List<CollectionEntity>, links: List<Membership>) {
+        val existing = allCollections().associateBy { it.name }.toMutableMap()
+        val ids = boards.associate { board ->
+            val id = existing[board.name]?.id ?: createCollection(board.copy(id = 0)).also { existing[board.name] = board.copy(id = it) }
+            board.id to id
+        }
+        posts.forEach { save(it) }
+        links.forEach { addMembership(it.copy(collectionId = ids.getValue(it.collectionId))) }
+    }
 }
 @Database(entities = [SavedPost::class, CollectionEntity::class, Membership::class, SearchHistory::class, DownloadEntity::class], version = 1, exportSchema = true)
 abstract class LibraryDatabase : RoomDatabase() { abstract fun library(): LibraryDao }

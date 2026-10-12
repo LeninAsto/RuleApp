@@ -9,7 +9,11 @@ class BenchmarkApplication : RuleApplication() {
     override val container by lazy { AppContainer(this, FixtureRepository()) }
     override fun onCreate() {
         super.onCreate()
-        runBlocking { container.preferences.confirm(setOf(Rating.GENERAL)) }
+        runBlocking {
+            container.preferences.confirm(setOf(Rating.GENERAL))
+            container.preferences.visit(Source.SHIMMIE)
+            container.preferences.acknowledgeVersion(BuildConfig.VERSION_CODE)
+        }
     }
     private inner class FixtureRepository : BooruRepository {
         private val previews by lazy {

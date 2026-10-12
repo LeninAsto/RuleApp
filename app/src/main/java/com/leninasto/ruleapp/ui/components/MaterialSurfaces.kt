@@ -1,4 +1,6 @@
 package com.leninasto.ruleapp.ui.components
+import com.leninasto.ruleapp.R
+import com.leninasto.ruleapp.core.t
 
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.RowScope
@@ -39,7 +41,7 @@ fun AppLoadingIndicator() {
                 waveAmplitude = (2 * density).toInt()
                 setWavelength((14 * density).toInt())
                 isIndeterminate = true
-                contentDescription = "Cargando"
+                contentDescription = t(R.string.ui_loading)
             }
         },
         update = { view -> view.setIndicatorColor(color.toArgb()); view.trackColor = track.toArgb() }

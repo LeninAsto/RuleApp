@@ -1,0 +1,12 @@
+{
+  "keys": 281,
+  "keyParity": true,
+  "formatParity": true,
+  "languages": [
+    "es",
+    "en"
+  ],
+  "physicalLanguageSwitch": true,
+  "coldRestartPersistence": true,
+  "packagedInAllApks": true
+}

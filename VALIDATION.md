@@ -39,3 +39,18 @@ Rule34.xxx web devolvió 403 con `cf-mitigated: challenge` desde el PC; su API d
 - Capturas de bienvenida y galería sintética revisadas visualmente en el dispositivo: `docs/screenshots/physical-welcome.png` y `physical-gallery.png`. La captura de bienvenida precede a la línea añadida sobre sugerencias.
 
 - UI física del APK benchmark final: al escribir `l` apareció el chip `landscape` con datos sintéticos. Se verificó el alcance local de Shimmie y se revisó la captura `docs/screenshots/physical-tags.png`.
+
+## Daparushi 0.9.1_beta · 12/10/2026
+
+Nombre oficial Daparushi, paleta marrón pastel e iconos PNG proporcionados por el propietario. Se conserva `com.leninasto.ruleapp` y la biblioteca existente. Configuración de firma privada excluida de Git, alias validado y firmas APK verificadas.
+
+La entrega final tiene español/inglés, selector de idioma persistente, bienvenida una vez por versión, archivo ver.txt, aviso de actualizaciones, última fuente y visitas, formulario obligatorio Rule34, tarjetas compactas, administrador de descargas, almacenamiento y copias JSON de favoritos/colecciones.
+
+- Debug, release, benchmark, APK de instrumentación, tests y lint compilan correctamente. 26 pruebas JVM y 19 pruebas físicas pasan en Samsung SM-A065M, API 36. Lint: 0 errores, 61 advertencias.
+- Recursos: 281 claves ES/EN con argumentos equivalentes. Cambio a inglés, vuelta entre actividades y reinicio del proceso verificados visualmente con contenido sintético. Capturas en docs/screenshots/0.9.1_beta.
+- Cinco APK release firmados: ARM64, ARMv7, x86, x86_64 y universal. Se verificó el filtro real de bibliotecas nativas y la firma de cada paquete. APK/checksums en dist; evidencia en docs/validation/0.9.1_beta.
+- El teléfono recibe el debug actualizado para conservar sus datos. El release tiene certificado diferente: no se desinstala ni se reemplaza forzosamente. Ver docs/RELEASE.md para exportar/restaurar la biblioteca al migrar.
+- Workflow preparado y validado como YAML/shell; ejecución remota/publicación pendiente de configurar secretos y subir código/tag. ver.txt debe publicarse en master para que el comprobador remoto funcione.
+- Se retiraron de Git 399 archivos de macrobenchmark/build, conservándolos localmente. No se versionan claves, contraseñas ni cachés de compilación.
+
+Continúan pendientes la validación autenticada Rule34 con credenciales introducidas por el propietario, la medición válida de Macrobenchmark y una revisión completa de TalkBack/ventana amplia del APK final. No se afirma que el objetivo del 95 % de frames se haya medido.

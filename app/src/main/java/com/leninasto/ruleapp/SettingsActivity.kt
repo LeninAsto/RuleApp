@@ -11,6 +11,15 @@ import com.leninasto.ruleapp.ui.NativeApp
 
 /** Separate, internal settings destination with the same lock and supervision gate. */
 class SettingsActivity : ComponentActivity() {
+    private var appliedLanguage = ""
+    override fun attachBaseContext(base: android.content.Context) {
+        appliedLanguage = com.leninasto.ruleapp.core.AppLanguage.tag(base)
+        super.attachBaseContext(com.leninasto.ruleapp.core.AppLanguage.wrap(base))
+    }
+    override fun onResume() {
+        super.onResume()
+        if (appliedLanguage != com.leninasto.ruleapp.core.AppLanguage.tag(this)) recreate()
+    }
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
@@ -19,7 +28,7 @@ class SettingsActivity : ComponentActivity() {
             androidx.compose.runtime.LaunchedEffect(Unit) {
                 intent.getStringExtra("source")?.let { name -> Source.entries.find { it.name == name }?.let(model::source) }
             }
-            NativeApp(model, settingsOnly = true, onSettingsBack = { finish() })
+            NativeApp(model, settingsOnly = true, openDownloads = intent.getBooleanExtra("downloads", false), onSettingsBack = { finish() })
         }
     }
 }

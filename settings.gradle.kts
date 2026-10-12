@@ -19,7 +19,7 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "Rule App"
+rootProject.name = "Daparushi"
 include(":app")
 include(":macrobenchmark")
 

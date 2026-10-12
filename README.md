@@ -1,4 +1,4 @@
-# RuleApp · cliente Android nativo
+# Daparushi · cliente Android nativo
 
 Galería Compose de fotos, GIF y videos para Shimmie2, Paheal, Rule34.xxx y Danbooru. Cliente no oficial para adultos, distribuido como APK personal. Sin anuncios, backend ni analítica.
 
@@ -12,7 +12,7 @@ Galería Compose de fotos, GIF y videos para Shimmie2, Paheal, Rule34.xxx y Danb
 
 4. Rule34 necesita `user_id` y API key personales en **Ajustes → Configurar**. Danbooru admite login/API key opcionales. Usa **Probar conexión** para verificar tu acceso.
 
-5. Los originales autorizados se descargan en `Downloads/RuleApp`; su estado aparece en Ajustes. Los metadatos guardados funcionan offline; el archivo requiere caché o descarga.
+5. Los originales autorizados se descargan en `Downloads/Daparushi`; su estado aparece en Ajustes. Los metadatos guardados funcionan offline; el archivo requiere caché o descarga.
 
 Una página totalmente oculta por filtros no dispara una búsqueda automática ilimitada. Se puede avanzar explícitamente con «Buscar en la página siguiente».
 
@@ -34,7 +34,7 @@ $env:ANDROID_HOME = "$env:LOCALAPPDATA\Android\Sdk"
 
 APK personal: `app/build/outputs/apk/debug/app-debug.apk`. Instalación: `adb -s SERIAL install -r app/build/outputs/apk/debug/app-debug.apk`. Selecciona explícitamente el dispositivo.
 
-Release se compila **sin firma**. Para distribución necesitas tu propio keystore y una configuración de firma externa al repositorio. No publiques el APK debug como release. Conserva la misma clave de firma para actualizar instalaciones existentes.
+Release se firma con el keystore del propietario si están presentes `keystore.properties` o las variables de firma. Ambos archivos privados están excluidos de Git. Conserva esta clave para todas las futuras actualizaciones release. La firma debug anterior es diferente: exporta la biblioteca antes de cambiar de instalación. Instrucciones en `docs/RELEASE.md`.
 
 ## Arquitectura y privacidad
 
@@ -114,8 +114,30 @@ La petición de lectura a la API, sin claves, recibió HTTP 200 con una cadena J
 
 ## Bienvenida e Información (0.9_beta)
 
-La bienvenida aparece una vez por apertura y conserva su estado al rotar o volver de Ajustes. El historial incluye 0.5_beta (inicio) y 0.9_beta (reconstrucción nativa). Info ofrece el historial, GitHub del creador, el repositorio y la donación voluntaria en Buy Me a Coffee. Ajustes se abre en SettingsActivity, interna y no exportada, con las mismas restricciones y bloqueo de la app. Los indicadores ondulados oficiales de Material Components 1.13.0 se integran en Compose mediante AppLoadingIndicator; se conserva Compose Material 3 estable 1.4.0.
+La bienvenida aparece una vez por versión instalada y se reconoce al pulsar Continuar; el reconocimiento persiste en DataStore. El historial incluye 0.5_beta (inicio) y 0.9_beta (reconstrucción nativa). Info ofrece el historial, GitHub del creador, el repositorio y la donación voluntaria en Buy Me a Coffee. Ajustes se abre en SettingsActivity, interna y no exportada, con las mismas restricciones y bloqueo de la app. Los indicadores ondulados oficiales de Material Components 1.13.0 se integran en Compose mediante AppLoadingIndicator; se conserva Compose Material 3 estable 1.4.0.
 
 ## Sugerencias de tags
 
 Desde la primera letra, Danbooru y Rule34 usan sus endpoints de autocomplete con una espera de 350 ms y cancelación al cambiar el texto o la fuente. Rule34 necesita sus credenciales. Shimmie2 y Paheal no ofrecen autocomplete por prefijo en la extensión documentada: se sugieren tags de publicaciones cargadas durante la sesión y metadatos guardados, respetando fuente y clasificaciones visibles. La UI indica ese alcance y explica errores o ausencia de sugerencias; no hace pasar un fallo por una búsqueda vacía. El vocabulario en memoria está limitado a 1000 publicaciones por fuente. Elegir un chip completa el último tag, conserva exclusiones/alternativas y añade un espacio para escribir el siguiente. La búsqueda de publicaciones se envía al confirmar.
+
+## Actualización 0.9.1_beta
+
+`ver.txt` en la raíz determina versionName y versionCode al compilar. El comprobador consulta el archivo publicado en `master` cada 12 horas al abrir la app y permite comprobar manualmente desde Info. Si hay una versión superior muestra un aviso y enlaza a Releases. No descarga ni instala APK automáticamente. Hasta publicar el archivo en GitHub, un 404 se explica como versión no publicada.
+
+Se conserva la última fuente y las fechas de visita, visibles en la selección de fuentes e Info. Rule34 exige credenciales si faltan y las valida contra su API antes de guardarlas. El formulario explica cómo obtenerlas y muestra errores sin filtrar claves.
+
+Las tarjetas compactas recortan proporciones extremas; el visor conserva el archivo completo. Se pueden elegir tarjetas más altas desde Ajustes. Los tags activos son chips independientes y el toque elimina solo ese tag.
+
+Descargas y almacenamiento se abre desde Info o Ajustes: progreso en bytes/porcentaje, filtros, abrir originales, reintentar fallos y cancelar/eliminar con confirmación. Android administra la espera por red; no se promete pausa manual. El visor distingue datos, caché, bytes registrados de descargas y volumen interno utilizado. Borrar un archivo conserva el favorito.
+
+Ajustes permite exportar/restaurar favoritos y colecciones a un JSON mediante el selector de archivos Android. La restauración combina guardados y tableros por nombre, es transaccional y no borra la biblioteca existente. No exporta credenciales, PIN, historial, archivos originales ni IDs de descargas; la copia contiene metadatos personales.
+
+## Identidad Daparushi
+
+Nombre oficial: **Daparushi**, paleta base marrón pastel. El identificador `com.leninasto.ruleapp` se conserva para compatibilidad. El marrón es el tema por defecto; puedes activar el color dinámico del sistema o el acento por fuente desde Ajustes. Los enlaces del proyecto siguen apuntando al repositorio existente RuleApp. Las nuevas descargas van a Downloads/Daparushi; las anteriores conservan su ubicación en DownloadManager.
+
+## Idiomas
+
+La interfaz está disponible en español e inglés. Cambia desde Ajustes → Idioma → English, Español o Idioma del sistema. También puedes elegir el idioma durante la primera confirmación de edad. La selección se guarda en este dispositivo y se aplica a MainActivity y SettingsActivity conservando el estado. El cambio de idioma y la rotación no activan el bloqueo; salir realmente de la app sí lo hace.
+
+Los textos se mantienen en `app/src/main/res/values/strings.xml` y `values-en/strings.xml`: 281 claves equivalentes con los mismos argumentos de formato. Incluyen mensajes de error, accesibilidad, clasificaciones, tipos de archivo, descargas, credenciales e historial de versiones. Los tags, nombres de sitios y colecciones creadas por el usuario se conservan.

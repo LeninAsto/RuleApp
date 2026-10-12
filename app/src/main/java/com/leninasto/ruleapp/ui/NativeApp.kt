@@ -1,4 +1,6 @@
 package com.leninasto.ruleapp.ui
+import com.leninasto.ruleapp.R
+import com.leninasto.ruleapp.core.t
 
 import android.Manifest
 import android.content.Intent
@@ -28,27 +30,23 @@ import com.leninasto.ruleapp.ui.components.*
 import kotlinx.coroutines.launch
 
 @Composable
-fun NativeApp(model: AppViewModel, settingsOnly: Boolean = false, onSettingsBack: () -> Unit = {}) {
+fun NativeApp(model: AppViewModel, settingsOnly: Boolean = false, openDownloads: Boolean = false, onSettingsBack: () -> Unit = {}) {
     val prefs by model.preferences.collectAsStateWithLifecycle()
     val spec by model.spec.collectAsStateWithLifecycle()
     val lock = model.container.lock
     val access by lock.accessible.collectAsStateWithLifecycle()
     val restricted by lock.restricted.collectAsStateWithLifecycle()
+    val restored by model.sourceRestored.collectAsStateWithLifecycle()
     val owner = androidx.lifecycle.compose.LocalLifecycleOwner.current
     val contextForLock = LocalContext.current
     val lockEnabled by lock.enabled.collectAsStateWithLifecycle()
     DisposableEffect(owner, lock) {
         lock.readPolicy()
-        val observer = androidx.lifecycle.LifecycleEventObserver { _, event ->
-            if (event == androidx.lifecycle.Lifecycle.Event.ON_STOP) lock.onBackground()
-            if (event == androidx.lifecycle.Lifecycle.Event.ON_RESUME) lock.onForeground()
-        }
-        owner.lifecycle.addObserver(observer)
         val receiver = object : android.content.BroadcastReceiver() {
             override fun onReceive(context: android.content.Context, intent: Intent) { lock.readPolicy() }
         }
         ContextCompat.registerReceiver(contextForLock, receiver, android.content.IntentFilter(android.content.Intent.ACTION_APPLICATION_RESTRICTIONS_CHANGED), ContextCompat.RECEIVER_NOT_EXPORTED)
-        onDispose { owner.lifecycle.removeObserver(observer); contextForLock.unregisterReceiver(receiver) }
+        onDispose { contextForLock.unregisterReceiver(receiver) }
     }
     DisposableEffect(lockEnabled) {
         val activity = contextForLock as? android.app.Activity
@@ -58,16 +56,20 @@ fun NativeApp(model: AppViewModel, settingsOnly: Boolean = false, onSettingsBack
     }
     AppTheme(prefs, source = spec.source) {
         if (!access || restricted) { LockScreen(lock, restricted); return@AppTheme }
-        if (prefs == null) { Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) { AppLoadingIndicator() }; return@AppTheme }
+        if (prefs == null || !restored) { Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) { AppLoadingIndicator() }; return@AppTheme }
         if (!prefs!!.adultConfirmed) { Onboarding(model::confirm); return@AppTheme }
         if (settingsOnly) {
-            Scaffold(topBar = { AppTopBar(title = { Text("Ajustes") }, navigationIcon = {
-                IconButton(onClick = onSettingsBack) { Icon(Icons.AutoMirrored.Filled.ArrowBack, "Volver") }
-            }) }) { padding -> Box(Modifier.padding(padding)) { SettingsScreen(model, prefs!!) } }
+            var downloads by rememberSaveable { mutableStateOf(openDownloads) }
+            androidx.activity.compose.BackHandler(downloads) { downloads = false }
+            Scaffold(topBar = { AppTopBar(title = { Text(if (downloads) t(R.string.ui_downloads) else t(R.string.ui_settings)) }, navigationIcon = {
+                IconButton(onClick = { if (downloads) downloads = false else onSettingsBack() }) { Icon(Icons.AutoMirrored.Filled.ArrowBack, t(R.string.ui_back)) }
+            }) }) { padding -> Box(Modifier.padding(padding)) { if (downloads) DownloadsScreen(model) else SettingsScreen(model, prefs!!, onDownloads = { downloads = true }) } }
             return@AppTheme
         }
-        var welcomeDismissed by rememberSaveable { mutableStateOf(false) }
-        if (!welcomeDismissed) { WelcomeScreen(onContinue = { welcomeDismissed = true }); return@AppTheme }
+        if (prefs!!.seenVersionCode != com.leninasto.ruleapp.BuildConfig.VERSION_CODE) {
+            WelcomeScreen(onContinue = model::acknowledgeVersion); return@AppTheme
+        }
+        LaunchedEffect(Unit) { model.checkUpdates() }
         val saved by model.saved.collectAsStateWithLifecycle()
         val collections by model.collections.collectAsStateWithLifecycle()
         val memberships by model.memberships.collectAsStateWithLifecycle()
@@ -77,6 +79,14 @@ fun NativeApp(model: AppViewModel, settingsOnly: Boolean = false, onSettingsBack
         val notice by model.notice.collectAsStateWithLifecycle()
         val scope = rememberCoroutineScope()
         val context = LocalContext.current
+        val updates by model.updateState.collectAsStateWithLifecycle()
+        var dismissedUpdate by rememberSaveable { mutableStateOf<String?>(null) }
+        if (updates.available && updates.latest != dismissedUpdate) AlertDialog(onDismissRequest = { dismissedUpdate = updates.latest },
+            title = { Text(t(R.string.ui_new_version_available)) }, text = { Text(t(R.string.ui_daparushi_s_is_available_review_the_apks_and, updates.latest)) },
+            confirmButton = { TextButton(onClick = {
+                dismissedUpdate = updates.latest
+                androidx.browser.customtabs.CustomTabsIntent.Builder().build().launchUrl(context, android.net.Uri.parse("https://github.com/LeninAsto/RuleApp/releases"))
+            }) { Text(t(R.string.ui_view_download)) } }, dismissButton = { TextButton(onClick = { dismissedUpdate = updates.latest }) { Text(t(R.string.ui_later)) } })
         var tab by rememberSaveable { mutableIntStateOf(0) }
         var viewerKey by rememberSaveable(stateSaver = listSaver<PostKey?, Any>(save = { key -> key?.let { listOf(it.siteId, it.postId) } ?: emptyList() }, restore = { if (it.isEmpty()) null else PostKey(it[0] as String, it[1] as Long) })) { mutableStateOf<PostKey?>(null) }
         var viewerSaved by rememberSaveable { mutableStateOf(false) }
@@ -88,7 +98,7 @@ fun NativeApp(model: AppViewModel, settingsOnly: Boolean = false, onSettingsBack
         val storage = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { allowed ->
             val post = pendingDownload; pendingDownload = null
             if (allowed && post != null) model.download(post)
-            else scope.launch { snackbar.showSnackbar("Hace falta permiso de almacenamiento en esta versiÃ³n de Android.") }
+            else scope.launch { snackbar.showSnackbar(t(R.string.ui_storage_permission_is_required_on_this_android_version)) }
         }
         val download: (BooruPost) -> Unit = { post ->
             if (Build.VERSION.SDK_INT <= 28 && ContextCompat.checkSelfPermission(context, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
@@ -105,17 +115,17 @@ fun NativeApp(model: AppViewModel, settingsOnly: Boolean = false, onSettingsBack
         val grid = when(spec.source) { Source.SHIMMIE -> shimmieGrid; Source.PAHEAL -> pahealGrid; Source.RULE34 -> ruleGrid; Source.DANBOORU -> danGrid }
         val open: (BooruPost) -> Unit = { viewerSaved = tab == 1; viewerKey = it.key }
         val share: (BooruPost) -> Unit = { post ->
-            context.startActivity(Intent.createChooser(Intent(Intent.ACTION_SEND).apply { type = "text/plain"; putExtra(Intent.EXTRA_TEXT, post.publicUrl) }, "Compartir publicaciÃ³n"))
+            context.startActivity(Intent.createChooser(Intent(Intent.ACTION_SEND).apply { type = "text/plain"; putExtra(Intent.EXTRA_TEXT, post.publicUrl) }, t(R.string.ui_share_post)))
         }
         val wide = LocalConfiguration.current.screenWidthDp >= 600
         Scaffold(snackbarHost = { SnackbarHost(snackbar) }, bottomBar = {
             if (!wide && viewerKey == null) NavigationBar {
-                listOf("Explorar", "Guardados", "Info").forEachIndexed { i, label -> NavigationBarItem(selected = tab == i, onClick = { tab = i }, icon = { Icon(navIcon(i), label) }, label = { Text(label) }) }
+                listOf(t(R.string.ui_explore), t(R.string.ui_saved), t(R.string.ui_info)).forEachIndexed { i, label -> NavigationBarItem(selected = tab == i, onClick = { tab = i }, icon = { Icon(navIcon(i), label) }, label = { Text(label) }) }
             }
         }) { padding ->
             Row(Modifier.fillMaxSize().padding(padding)) {
                 if (wide && viewerKey == null) NavigationRail {
-                    listOf("Explorar", "Guardados", "Info").forEachIndexed { i, label -> NavigationRailItem(selected = tab == i, onClick = { tab = i }, icon = { Icon(navIcon(i), label) }, label = { Text(label) }) }
+                    listOf(t(R.string.ui_explore), t(R.string.ui_saved), t(R.string.ui_info)).forEachIndexed { i, label -> NavigationRailItem(selected = tab == i, onClick = { tab = i }, icon = { Icon(navIcon(i), label) }, label = { Text(label) }) }
                 }
                 Box(Modifier.weight(1f).fillMaxHeight()) {
                     if (viewerKey != null) {
@@ -128,30 +138,33 @@ fun NativeApp(model: AppViewModel, settingsOnly: Boolean = false, onSettingsBack
                         0 -> ExploreScreen(model, spec, prefs!!, pages, grid, savedKeys, kinds, open, { actionPost = it }, model::toggle,
                             { filters = true }, { model.search(it); scope.launch { grid.scrollToItem(0) } })
                         1 -> SavedScreen(visibleSaved, savedKeys, collections, memberships, { post, list -> model.savedViewerPosts = list; open(post) }, { actionPost = it }, model::toggle, model::collection, model::deleteCollection)
-                        else -> InfoScreen(onSettings = { context.startActivity(Intent(context, com.leninasto.ruleapp.SettingsActivity::class.java).putExtra("source", spec.source.name)) })
+                        else -> InfoScreen(model = model,
+                            onSource = { model.source(it); tab = 0 },
+                            onDownloads = { context.startActivity(Intent(context, com.leninasto.ruleapp.SettingsActivity::class.java).putExtra("source", spec.source.name).putExtra("downloads", true)) },
+                            onSettings = { context.startActivity(Intent(context, com.leninasto.ruleapp.SettingsActivity::class.java).putExtra("source", spec.source.name)) })
                     }
                 }
             }
         }
         if (filters) AppBottomSheet(onDismissRequest = { filters = false }) {
             Column(Modifier.padding(24.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                Text("Tu galerÃ­a, a tu gusto", style = MaterialTheme.typography.headlineSmall)
-                Text("Orden en ${spec.source.label}", style = MaterialTheme.typography.titleMedium)
-                FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) { spec.source.capabilities.orders.forEach { order -> FilterChip(selected = spec.order == order, onClick = { model.order(order); scope.launch { grid.scrollToItem(0) } }, label = { Text(order.label) }) } }
-                Text("Tipo de archivo Â· filtro local")
-                FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) { MediaKind.entries.forEach { kind -> FilterChip(selected = kind in kinds, onClick = { kinds = if (kind in kinds) kinds - kind else kinds + kind }, label = { Text(kind.label) }) } }
+                Text(t(R.string.ui_your_gallery_your_way), style = MaterialTheme.typography.headlineSmall)
+                Text(t(R.string.ui_sort_on_s, spec.source.label), style = MaterialTheme.typography.titleMedium)
+                FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) { spec.source.capabilities.orders.forEach { order -> FilterChip(selected = spec.order == order, onClick = { model.order(order); scope.launch { grid.scrollToItem(0) } }, label = { Text(order.uiLabel()) }) } }
+                Text(t(R.string.ui_file_type_local_filter))
+                FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) { MediaKind.entries.forEach { kind -> FilterChip(selected = kind in kinds, onClick = { kinds = if (kind in kinds) kinds - kind else kinds + kind }, label = { Text(kind.uiLabel()) }) } }
                 RatingChoices(prefs!!.ratings, model::ratings)
-                Text("Los filtros locales ocultan tarjetas; la bÃºsqueda continÃºa segÃºn las pÃ¡ginas del servidor.", style = MaterialTheme.typography.bodySmall)
-                Button(onClick = { filters = false }) { Text("Listo") }
+                Text(t(R.string.ui_local_filters_hide_cards_search_continues_using_the), style = MaterialTheme.typography.bodySmall)
+                Button(onClick = { filters = false }) { Text(t(R.string.ui_done)) }
             }
         }
         actionPost?.let { post -> AppBottomSheet(onDismissRequest = { actionPost = null }) {
             Column(Modifier.padding(24.dp)) {
-                Text("PublicaciÃ³n #${post.key.postId}", style = MaterialTheme.typography.titleLarge)
-                TextButton(onClick = { model.toggle(post); actionPost = null }) { Text(if (post.key in savedKeys) "Quitar de favoritos" else "Guardar en favoritos") }
-                TextButton(onClick = { collectionPost = post; actionPost = null }) { Text("AÃ±adir a colecciÃ³n") }
-                TextButton(enabled = post.originalUrl != null, onClick = { download(post); actionPost = null }) { Text("Descargar original") }
-                TextButton(onClick = { share(post); actionPost = null }) { Text("Compartir enlace") }
+                Text(t(R.string.ui_post_s_486a92, post.key.postId), style = MaterialTheme.typography.titleLarge)
+                TextButton(onClick = { model.toggle(post); actionPost = null }) { Text(if (post.key in savedKeys) t(R.string.ui_remove_from_favorites) else t(R.string.ui_save_to_favorites)) }
+                TextButton(onClick = { collectionPost = post; actionPost = null }) { Text(t(R.string.ui_add_to_collection)) }
+                TextButton(enabled = post.originalUrl != null, onClick = { download(post); actionPost = null }) { Text(t(R.string.ui_download_original)) }
+                TextButton(onClick = { share(post); actionPost = null }) { Text(t(R.string.ui_share_link)) }
             }
         } }
         collectionPost?.let { post -> CollectionPicker(post, collections, memberships, { collectionPost = null }, { model.collect(post, it) }, { model.uncollect(post, it) }, { model.collection(it, post) }) }

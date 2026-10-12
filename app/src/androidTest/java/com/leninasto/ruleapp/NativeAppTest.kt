@@ -1,4 +1,5 @@
 package com.leninasto.ruleapp
+import com.leninasto.ruleapp.core.t
 
 import android.app.Application
 import androidx.activity.ComponentActivity
@@ -38,25 +39,25 @@ class NativeAppTest {
     @Before fun setup() {
         val app = ApplicationProvider.getApplicationContext<Application>()
         container = AppContainer(app, repository, "ui-test.db")
-        runBlocking { container.library.dao.clearLibrary(); container.preferences.confirm(setOf(Rating.GENERAL)) }
+        runBlocking { container.library.dao.clearLibrary(); container.preferences.confirm(setOf(Rating.GENERAL)); container.preferences.acknowledgeVersion(0); container.preferences.visit(Source.SHIMMIE) }
         compose.runOnUiThread { model = AppViewModel(container, SavedStateHandle()); store.put("test", model) }
         compose.setContent { NativeApp(model) }
-        compose.onNodeWithText("Continuar a RuleApp").performClick()
+        compose.onNodeWithText(t(R.string.ui_continue_to_daparushi)).performClick()
         compose.waitUntil(10_000) { calls.isNotEmpty() }
     }
     @After fun cleanup() { compose.runOnUiThread { store.clear() }; container.database.close() }
     @Test fun favoritesCollectionsAndNavigationWork() {
-        compose.onAllNodesWithContentDescription("Guardar en favoritos").onFirst().performClick()
+        compose.onAllNodesWithContentDescription(t(R.string.ui_save_to_favorites)).onFirst().performClick()
         compose.waitUntil(5000) { model.saved.value.isNotEmpty() }
-        compose.onNodeWithText("Guardados").performClick()
-        compose.onNodeWithText("Tus guardados").assertIsDisplayed()
-        compose.onNodeWithContentDescription("Crear colecciÃ³n").performClick()
-        compose.onNodeWithText("Nombre").performTextInput("Paisajes")
-        compose.onNodeWithText("Crear", useUnmergedTree = true).performClick()
+        compose.onNodeWithText(t(R.string.ui_saved)).performClick()
+        compose.onNodeWithText(t(R.string.ui_your_saved_posts)).assertIsDisplayed()
+        compose.onNodeWithContentDescription(t(R.string.ui_create_collection)).performClick()
+        compose.onNodeWithText(t(R.string.ui_name)).performTextInput("Paisajes")
+        compose.onNodeWithText(t(R.string.ui_create), useUnmergedTree = true).performClick()
         compose.waitUntil(5000) { model.collections.value.any { it.name == "Paisajes" } }
         compose.onNodeWithText("Paisajes").assertIsDisplayed()
-        compose.onNodeWithText("Info", useUnmergedTree = true).performClick()
-        compose.onNodeWithText("Abrir Ajustes").assertIsDisplayed()
+        compose.onNodeWithText(t(R.string.ui_info), useUnmergedTree = true).performClick()
+        compose.onNodeWithText(t(R.string.ui_open_settings)).assertIsDisplayed()
     }
     @Test fun sourceSwitchCancelsOldSearchAndRepeatingQueryReloads() {
         compose.runOnUiThread { model.search("slow") }
@@ -70,23 +71,23 @@ class NativeAppTest {
         assertEquals(Source.DANBOORU, model.spec.value.source)
     }
     @Test fun detailOpensAndReturnsToGallery() {
-        compose.onAllNodesWithContentDescription("PublicaciÃ³n 1, Imagen, General").onFirst().performClick()
+        compose.onAllNodesWithContentDescription(t(R.string.post_accessibility_description, 1, com.leninasto.ruleapp.domain.MediaKind.IMAGE.uiLabel(), com.leninasto.ruleapp.domain.Rating.GENERAL.uiLabel())).onFirst().performClick()
         compose.onNodeWithText("#1").assertIsDisplayed()
-        compose.onNodeWithContentDescription("Volver a la galerÃ­a").performClick()
-        compose.onAllNodesWithText("Explorar", useUnmergedTree = true).onFirst().assertExists()
+        compose.onNodeWithContentDescription(t(R.string.ui_back_to_gallery)).performClick()
+        compose.onAllNodesWithText(t(R.string.ui_explore), useUnmergedTree = true).onFirst().assertExists()
     }
     @Test fun appendFailureCanRetryWithoutResettingGallery() {
         failAppend = true
         compose.onNodeWithTag("gallery").performScrollToIndex(29)
-        compose.waitUntil(10_000) { compose.onAllNodesWithText("No pudimos cargar mÃ¡s").fetchSemanticsNodes().isNotEmpty() }
+        compose.waitUntil(10_000) { compose.onAllNodesWithText(t(R.string.ui_we_could_not_load_more)).fetchSemanticsNodes().isNotEmpty() }
         compose.onNodeWithTag("gallery").performScrollToIndex(30)
-        compose.onNodeWithText("No pudimos cargar mÃ¡s").assertExists()
+        compose.onNodeWithText(t(R.string.ui_we_could_not_load_more)).assertExists()
         failAppend = false
-        compose.onNodeWithText("Reintentar").performClick()
-        compose.waitUntil(10_000) { compose.onAllNodesWithText("No pudimos cargar mÃ¡s").fetchSemanticsNodes().isEmpty() }
+        compose.onNodeWithText(t(R.string.ui_retry)).performClick()
+        compose.waitUntil(10_000) { compose.onAllNodesWithText(t(R.string.ui_we_could_not_load_more)).fetchSemanticsNodes().isEmpty() }
         compose.onNodeWithTag("gallery").performScrollToIndex(31)
         compose.onNodeWithTag("gallery").performScrollToIndex(0)
-        compose.onAllNodesWithContentDescription("PublicaciÃ³n 1, Imagen, General").onFirst().assertIsDisplayed()
+        compose.onAllNodesWithContentDescription(t(R.string.post_accessibility_description, 1, com.leninasto.ruleapp.domain.MediaKind.IMAGE.uiLabel(), com.leninasto.ruleapp.domain.Rating.GENERAL.uiLabel())).onFirst().assertIsDisplayed()
     }
     @Test fun switchingSourceRestoresScrollAndDoesNotReloadCachedPage() {
         compose.onNodeWithTag("gallery").performScrollToIndex(14)
@@ -95,7 +96,7 @@ class NativeAppTest {
         compose.waitUntil(5000) { calls.any { it.source == Source.PAHEAL } }
         compose.runOnUiThread { model.source(Source.SHIMMIE) }
         compose.waitForIdle()
-        compose.onAllNodesWithContentDescription("PublicaciÃ³n 15, Imagen, General").onFirst().assertIsDisplayed()
+        compose.onAllNodesWithContentDescription(t(R.string.post_accessibility_description, 15, com.leninasto.ruleapp.domain.MediaKind.IMAGE.uiLabel(), com.leninasto.ruleapp.domain.Rating.GENERAL.uiLabel())).onFirst().assertIsDisplayed()
         assertEquals(count, calls.count { it.source == Source.SHIMMIE })
     }
 }

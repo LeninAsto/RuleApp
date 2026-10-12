@@ -1,7 +1,7 @@
 param([Parameter(Mandatory = $true)][string]$Serial)
 $ErrorActionPreference = 'Stop'
 $taskRoot = Split-Path -Parent $PSScriptRoot
-$taskApk = Join-Path $taskRoot 'dist\RuleApp-0.9_beta-debug.apk'
+$taskApk = Join-Path $taskRoot 'dist\Daparushi-0.9.1_beta-debug.apk'
 $taskAdb = Join-Path $env:LOCALAPPDATA 'Android\Sdk\platform-tools\adb.exe'
 if (!(Test-Path -LiteralPath $taskApk)) { throw 'Falta el APK en dist. Compila o usa app/build/outputs/apk/debug/app-debug.apk.' }
 if (!(Test-Path -LiteralPath $taskAdb)) { throw 'No se encontrÃ³ ADB en el SDK del usuario.' }

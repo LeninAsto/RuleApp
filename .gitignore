@@ -15,3 +15,10 @@
 local.properties
 
 /dist/
+/keystore
+/keystore.properties
+*.jks
+*.p12
+**/build/
+
+/.kotlin/

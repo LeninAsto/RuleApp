@@ -1,0 +1,16 @@
+
+com.leninasto.ruleapp.WelcomeScreenTest:...
+com.leninasto.ruleapp.LocalizationTest:..
+com.leninasto.ruleapp.PreferencesPersistenceTest:.
+com.leninasto.ruleapp.AppLockTest:..
+com.leninasto.ruleapp.CredentialStoreTest:.
+com.leninasto.ruleapp.LibraryDatabaseTest:...
+com.leninasto.ruleapp.MediaTest:..
+com.leninasto.ruleapp.LiveSourcesTest:....
+com.leninasto.ruleapp.DownloadTest:.
+
+Time: 33.097
+
+OK (19 tests)
+
+

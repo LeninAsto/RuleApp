@@ -1,4 +1,5 @@
 package com.leninasto.ruleapp
+import com.leninasto.ruleapp.core.t
 
 import androidx.activity.ComponentActivity
 import androidx.compose.ui.test.*
@@ -20,17 +21,17 @@ class WelcomeScreenTest {
     @Test fun welcomeShowsCurrentReleaseAndAllowsContinue() {
         var continued = false
         compose.setContent { AppTheme(AppPreferences()) { WelcomeScreen { continued = true } } }
-        compose.onNodeWithText("Bienvenido a RuleApp").assertIsDisplayed()
-        compose.onNodeWithText("0.9_beta").assertIsDisplayed()
-        compose.onNodeWithText("Continuar a RuleApp").performClick()
+        compose.onNodeWithText(t(R.string.ui_welcome_to_daparushi)).assertIsDisplayed()
+        compose.onNodeWithText(BuildConfig.VERSION_NAME).assertIsDisplayed()
+        compose.onNodeWithText(t(R.string.ui_continue_to_daparushi)).performClick()
         compose.runOnIdle { assertTrue(continued) }
     }
     @Test fun infoProvidesSettingsAndProjectLinks() {
         var opened = false
         compose.setContent { AppTheme(AppPreferences()) { InfoScreen { opened = true } } }
-        compose.onNodeWithText("GitHub del creador").assertIsDisplayed()
-        compose.onNodeWithText("Código del proyecto").assertIsDisplayed()
-        compose.onNodeWithText("Abrir Ajustes").performClick()
+        compose.onNodeWithText(t(R.string.ui_creator_s_github)).assertIsDisplayed()
+        compose.onNodeWithText(t(R.string.ui_project_source_code)).assertIsDisplayed()
+        compose.onNodeWithText(t(R.string.ui_open_settings)).performClick()
         compose.runOnIdle { assertTrue(opened) }
     }
     @Test fun officialWavyIndicatorCanBeHostedInCompose() {

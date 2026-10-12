@@ -1,0 +1,56 @@
+[
+  {
+    "file": "Daparushi-0.9.1_beta-arm64-v8a.apk",
+    "sha256": "b4394606fd041ef25c053f89a8c16ea8a811fee78b6b0a36aa9d0b761be6ce8b",
+    "abis": [
+      "arm64-v8a"
+    ],
+    "signatureVerified": true
+  },
+  {
+    "file": "Daparushi-0.9.1_beta-armeabi-v7a.apk",
+    "sha256": "13d10d7a591bbf560b63f3424dbb13d34394b6b0d23cf658a459124bc595b677",
+    "abis": [
+      "armeabi-v7a"
+    ],
+    "signatureVerified": true
+  },
+  {
+    "file": "Daparushi-0.9.1_beta-debug.apk",
+    "sha256": "17de752c3a2af3f8184373a9eea24a6439aaa3a7155c2dae5167810a64bbe57d",
+    "abis": [
+      "arm64-v8a",
+      "armeabi-v7a",
+      "x86",
+      "x86_64"
+    ],
+    "signatureVerified": true
+  },
+  {
+    "file": "Daparushi-0.9.1_beta-universal.apk",
+    "sha256": "e96cfa5b94d7b04d445881ee5132ee71e2e373b2cf25d5fce9111e899d94c6f1",
+    "abis": [
+      "arm64-v8a",
+      "armeabi-v7a",
+      "x86",
+      "x86_64"
+    ],
+    "signatureVerified": true
+  },
+  {
+    "file": "Daparushi-0.9.1_beta-x86.apk",
+    "sha256": "0e501d014399fa9a188c32617ae2b97cc62577a6a53db9407244008394647687",
+    "abis": [
+      "x86"
+    ],
+    "signatureVerified": true
+  },
+  {
+    "file": "Daparushi-0.9.1_beta-x86_64.apk",
+    "sha256": "39db54d71dff7c9e00a0aeb9e2dba6811c59a85dc3c63f1ac61eae9968e7475f",
+    "abis": [
+      "x86_64"
+    ],
+    "signatureVerified": true
+  }
+]
